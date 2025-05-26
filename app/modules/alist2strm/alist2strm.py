@@ -216,7 +216,9 @@ class Alist2Strm:
             local_path = self.target_dir / relative_path
 
         # 截断字符串保证文件名不超过数值
-        local_path = Path(str(local_path)[:200])
+        logger.info(f"原始文件路径=>{str(local_path)}")
+        local_path = Path(str(local_path)[:150])
+        logger.info(f"截取后文件路径=>{str(local_path)}")
 
         if path.suffix.lower() in VIDEO_EXTS or path.suffix.lower() in self.create_strm_file_ext:
             local_path = local_path.with_suffix(".strm")
