@@ -84,7 +84,7 @@ class Alist2Strm:
 
         self.download_exts = download_exts
         self.create_strm_file_ext = create_strm_file_ext
-        self.process_file_exts = VIDEO_EXTS | download_exts
+        self.process_file_exts = VIDEO_EXTS | download_exts | create_strm_file_ext
 
         self.overwrite = overwrite
         self.__max_workers = Semaphore(max_workers)
