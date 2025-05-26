@@ -209,7 +209,7 @@ class Alist2Strm:
             local_path = self.target_dir / relative_path
 
         # 截断字符串保证文件名不超过数值
-        local_path = local_path[:200]
+        local_path = Path(str(local_path)[:200])
 
         if path.suffix.lower() in VIDEO_EXTS:
             local_path = local_path.with_suffix(".strm")
