@@ -1,4 +1,4 @@
-FROM python:3.12.7-alpine AS builder
+FROM registry.cn-hangzhou.aliyuncs.com/fengmuxi-docker-images/docker.io_python:3.12.7-alpine AS builder
 WORKDIR /builder
 
 RUN apk update && \
@@ -18,7 +18,7 @@ RUN python setup.py
 RUN apk del build-base linux-headers && \
     find app -type f \( -name "*.py" ! -name "main.py" ! -name "__init__.py" -o -name "*.c" \) -delete 
 
-FROM python:3.12.7-alpine
+FROM registry.cn-hangzhou.aliyuncs.com/fengmuxi-docker-images/docker.io_python:3.12.7-alpine
 
 ENV TZ=Asia/Shanghai
 VOLUME ["/config", "/logs", "/media"]
