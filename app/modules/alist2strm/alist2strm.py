@@ -27,6 +27,7 @@ class Alist2Strm:
         mode: str = "AlistURL",
         overwrite: bool = False,
         other_ext: str = "",
+        file_ext: str = "",
         max_workers: int = 50,
         max_downloaders: int = 5,
         wait_time: float | int = 0,
@@ -50,6 +51,7 @@ class Alist2Strm:
         :param overwrite: 本地路径存在同名文件时是否重新生成/下载该文件，默认为 False
         :param sync_server: 是否同步服务器，启用后若服务器中删除了文件，也会将本地文件删除，默认为 True
         :param other_ext: 自定义下载后缀，使用西文半角逗号进行分割，默认为空
+        :param file_ext: 自定义需要生成strm文件后缀，使用西文半角逗号进行分割，（可选，默认为空）
         :param max_workers: 最大并发数
         :param max_downloaders: 最大同时下载
         :param wait_time: 遍历请求间隔时间，单位为秒，默认为 0
@@ -76,7 +78,12 @@ class Alist2Strm:
         if other_ext:
             download_exts |= frozenset(other_ext.lower().split(","))
 
+        create_strm_file_ext: set[str] = set()
+        if file_ext:
+            create_strm_file_ext |= frozenset(file_ext.lower().split(","))
+
         self.download_exts = download_exts
+        self.create_strm_file_ext = create_strm_file_ext
         self.process_file_exts = VIDEO_EXTS | download_exts
 
         self.overwrite = overwrite
@@ -211,7 +218,7 @@ class Alist2Strm:
         # 截断字符串保证文件名不超过数值
         local_path = Path(str(local_path)[:200])
 
-        if path.suffix.lower() in VIDEO_EXTS:
+        if path.suffix.lower() in VIDEO_EXTS or path.suffix.lower() in self.create_strm_file_ext:
             local_path = local_path.with_suffix(".strm")
 
         return local_path
