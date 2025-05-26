@@ -40,13 +40,13 @@ class HTTPClient:
         """
         创建新的同步 HTTP 客户端
         """
-        self.__sync_client = Client(http2=True, follow_redirects=True, timeout=10)
+        self.__sync_client = Client(http2=True, follow_redirects=True, timeout=20)
 
     def __new_async_client(self):
         """
         创建新的异步 HTTP 客户端
         """
-        self.__async_client = AsyncClient(http2=True, follow_redirects=True, timeout=10)
+        self.__async_client = AsyncClient(http2=True, follow_redirects=True, timeout=20)
 
     def close_sync_client(self) -> None:
         """
