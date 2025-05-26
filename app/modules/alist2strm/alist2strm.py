@@ -15,6 +15,7 @@ class Alist2Strm:
     def __init__(
         self,
         url: str = "http://localhost:5244",
+        strm_url: str = "",
         username: str = "",
         password: str = "",
         token: str = "",
@@ -39,6 +40,7 @@ class Alist2Strm:
         实例化 Alist2Strm 对象
 
         :param url: Alist 服务器地址，默认为 "http://localhost:5244"
+        :param strm_url: 生成的strm中的Alist 服务器地址（留空默认url地址，默认空）
         :param username: Alist 用户名，默认为空
         :param password: Alist 密码，默认为空
         :param source_dir: 需要同步的 Alist 的目录，默认为 "/"
@@ -58,7 +60,7 @@ class Alist2Strm:
         :param sync_ignore: 同步时忽略的文件正则表达式
         """
 
-        self.client = AlistClient(url, username, password, token)
+        self.client = AlistClient(url, strm_url, username, password, token)
         self.mode = mode
 
         self.source_dir = source_dir
@@ -217,7 +219,8 @@ class Alist2Strm:
 
         # 截断字符串保证文件名不超过数值
         logger.info(f"原始文件路径=>{str(local_path)}")
-        local_path = Path(str(local_path)[:150])
+        # local_path = Path(str(local_path)[:200])
+        local_path = Path(str(local_path).replace(" ", ""))
         logger.info(f"截取后文件路径=>{str(local_path)}")
 
         if path.suffix.lower() in VIDEO_EXTS or path.suffix.lower() in self.create_strm_file_ext:
@@ -233,9 +236,9 @@ class Alist2Strm:
         logger.info("开始清理本地文件")
 
         if self.flatten_mode:
-            all_local_files = [f for f in self.target_dir.iterdir() if f.is_file()]
+            all_local_files = [Path(str(f).replace(" ", "")) for f in self.target_dir.iterdir() if f.is_file()]
         else:
-            all_local_files = [f for f in self.target_dir.rglob("*") if f.is_file()]
+            all_local_files = [Path(str(f).replace(" ", "")) for f in self.target_dir.rglob("*") if f.is_file()]
 
         files_to_delete = set(all_local_files) - self.processed_local_paths
 

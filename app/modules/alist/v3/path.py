@@ -13,6 +13,7 @@ class AlistPath(BaseModel):
     """
 
     server_url: str  # 服务器地址
+    strm_url: str  # strm文件记录地址
     base_path: str  # 基础路径（用于计算文件/目录在 Alist 服务器上的绝对地址）
     file_path: str  # 文件/目录路径
     path: str  # 文件/目录路径
@@ -45,9 +46,15 @@ class AlistPath(BaseModel):
         文件下载地址
         """
         if self.sign:
-            url = self.server_url + "/d" + self.abs_path + "?sign=" + self.sign
+            if self.strm_url:
+                url = self.strm_url + "/d" + self.abs_path + "?sign=" + self.sign
+            else:
+                url = self.server_url + "/d" + self.abs_path + "?sign=" + self.sign
         else:
-            url = self.server_url + "/d" + self.abs_path
+            if self.strm_url:
+                url = self.strm_url + "/d" + self.abs_path
+            else:
+                url = self.server_url + "/d" + self.abs_path
 
         return URLUtils.encode(url)
 

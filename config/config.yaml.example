@@ -2,9 +2,10 @@ Settings:
   DEV: False                          # 开发者模式(可选，默认 False)
 
 Alist2StrmList:
-  - id: 动漫                          # 标识 ID
+  - id: 动漫                           # 标识 ID
     cron: 0 20 * * *                  # 后台定时任务 Cron 表达式
     url: https://alist.akimio.top     # Alist 服务器地址
+    strm_url:                         # 生成的strm中的Alist 服务器地址（留空默认url地址，默认空）
     username: admin                   # Alist 用户名
     password: adminadmin              # Alist 密码
     token: alist-d22d23ddf42fvv2      # Alist Token 永久令牌（可选，使用永久令牌则无需设置账号密码）
@@ -27,6 +28,7 @@ Alist2StrmList:
   - id: 电影
     cron: 0 0 7 * *
     url: http://alist.example2.com:5244
+    strm_url: 
     username: alist
     password: alist
     token:

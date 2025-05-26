@@ -18,6 +18,7 @@ class AlistClient(metaclass=Multiton):
     def __init__(
         self,
         url: str,
+        strm_url: str,
         username: str = "",
         password: str = "",
         token: str = "",
@@ -26,12 +27,13 @@ class AlistClient(metaclass=Multiton):
         AlistClient 类初始化
 
         :param url: Alist 服务器地址
+        :param strm_url: strm中Alist 服务器地址
         :param username: Alist 用户名
         :param password: Alist 密码
         :param token: Alist 永久令牌
         """
 
-        if (username == "" or password == "") and token == "":
+        if token == "" and (username == "" or password == ""):
             raise ValueError("用户名及密码为空或令牌 Token 为空")
 
         self.__client = RequestUtils.get_client()
@@ -45,6 +47,10 @@ class AlistClient(metaclass=Multiton):
         if not url.startswith("http"):
             url = "https://" + url
         self.url = url.rstrip("/")
+
+        if not strm_url.startswith("http"):
+            strm_url = "https://" + strm_url
+        self.strm_url = strm_url.rstrip("/")
 
         if token != "":
             self.__token["token"] = token
@@ -216,6 +222,7 @@ class AlistClient(metaclass=Multiton):
         return [
             AlistPath(
                 server_url=self.url,
+                strm_url=self.strm_url,
                 base_path=self.base_path,
                 file_path=dir_path + "/" + alist_path["name"],
                 **alist_path,
@@ -254,6 +261,7 @@ class AlistClient(metaclass=Multiton):
         logger.debug(f"获取路径 {path} 详细信息成功")
         return AlistPath(
             server_url=self.url,
+            strm_url=self.strm_url,
             base_path=self.base_path,
             file_path=path,
             **result["data"],

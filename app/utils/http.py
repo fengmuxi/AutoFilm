@@ -40,13 +40,13 @@ class HTTPClient:
         """
         创建新的同步 HTTP 客户端
         """
-        self.__sync_client = Client(http2=True, follow_redirects=True, timeout=10)
+        self.__sync_client = Client(http1=True, http2=False, follow_redirects=True, timeout=20)
 
     def __new_async_client(self):
         """
         创建新的异步 HTTP 客户端
         """
-        self.__async_client = AsyncClient(http2=True, follow_redirects=True, timeout=10)
+        self.__async_client = AsyncClient(http1=True, http2=False, follow_redirects=True, timeout=20)
 
     def close_sync_client(self) -> None:
         """
@@ -62,29 +62,37 @@ class HTTPClient:
         if self.__async_client:
             await self.__async_client.aclose()
 
-    @Retry.sync_retry(TimeoutException, tries=3, delay=1, backoff=2)
+    @Retry.sync_retry(TimeoutException, tries=3, delay=2, backoff=4)
     def _sync_request(self, method: str, url: str, **kwargs) -> Response | None:
         """
         发起同步 HTTP 请求
         """
         try:
-            return self.__sync_client.request(method, url, **kwargs)
+            logger.debug(f'同步 HTTP:{url}')
+            res = self.__sync_client.request(method, url, **kwargs)
+            logger.debug(f'同步 HTTP:{url} 请求返回信息=>{res.status_code}')
+            return res
         except TimeoutException as e:
             self.close_sync_client()
             self.__new_sync_client()
-            raise TimeoutException(f"HTTP 请求超时：{e}")
+            logger.warning(f"HTTP 请求超时：{e}")
+            raise e
 
-    @Retry.async_retry(TimeoutException, tries=3, delay=1, backoff=2)
+    @Retry.async_retry(TimeoutException, tries=3, delay=2, backoff=4)
     async def _async_request(self, method: str, url: str, **kwargs) -> Response | None:
         """
         发起异步 HTTP 请求
         """
         try:
-            return await self.__async_client.request(method, url, **kwargs)
+            logger.debug(f'异步 HTTP:{url}')
+            res = await self.__async_client.request(method, url, **kwargs)
+            logger.debug(f'异步 HTTP:{url} 请求返回信息=>{res.status_code}')
+            return res
         except TimeoutException as e:
             await self.close_async_client()
             self.__new_async_client()
-            raise TimeoutException(f"HTTP 请求超时：{e}")
+            logger.warning(f"HTTP 请求超时：{e}")
+            raise e
 
     @overload
     def request(
@@ -255,20 +263,23 @@ class HTTPClient:
         with TemporaryDirectory(prefix="AutoFilm_") as temp_dir:  # 创建临时目录
             temp_file = Path(temp_dir) / file_path.name
 
-            if file_size == -1:
-                logger.debug(f"{file_path.name} 文件大小未知，直接下载")
-                await self.__download_chunk(url, temp_file, 0, 0, **kwargs)
-            else:
-                async with TaskGroup() as tg:
-                    logger.debug(
-                        f"开始分片下载文件：{file_path.name}，分片数:{chunk_num}"
-                    )
-                    for start, end in self.caculate_divisional_range(
-                        file_size, chunk_num=chunk_num
-                    ):
-                        tg.create_task(
-                            self.__download_chunk(url, temp_file, start, end, **kwargs)
-                        )
+            logger.debug(f"{file_path.name} 文件大小{file_size}，直接下载")
+            await self.__download_chunk(url, temp_file, 0, 0, **kwargs)
+
+            # if file_size == -1:
+            #     logger.debug(f"{file_path.name} 文件大小未知，直接下载")
+            #     await self.__download_chunk(url, temp_file, 0, 0, **kwargs)
+            # else:
+            #     async with TaskGroup() as tg:
+            #         logger.debug(
+            #             f"开始分片下载文件：{file_path.name}，分片数:{chunk_num}"
+            #         )
+            #         for start, end in self.caculate_divisional_range(
+            #             file_size, chunk_num=chunk_num
+            #         ):
+            #             tg.create_task(
+            #                 self.__download_chunk(url, temp_file, start, end, **kwargs)
+            #             )
             copy(temp_file, file_path)
 
     async def __download_chunk(
