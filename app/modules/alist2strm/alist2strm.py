@@ -220,8 +220,8 @@ class Alist2Strm:
         # 截断字符串保证文件名不超过数值
         logger.info(f"原始文件路径=>{str(local_path)}")
         # local_path = Path(str(local_path)[:200])
-        local_path = Path(str(local_path).replace(" ", ""))
-        logger.info(f"截取后文件路径=>{str(local_path)}")
+        # local_path = Path(str(local_path).replace(" ", ""))
+        # logger.info(f"截取后文件路径=>{str(local_path)}")
 
         if path.suffix.lower() in VIDEO_EXTS or path.suffix.lower() in self.create_strm_file_ext:
             local_path = local_path.with_suffix(".strm")
@@ -236,9 +236,9 @@ class Alist2Strm:
         logger.info("开始清理本地文件")
 
         if self.flatten_mode:
-            all_local_files = [Path(str(f).replace(" ", "")) for f in self.target_dir.iterdir() if f.is_file()]
+            all_local_files = [f for f in self.target_dir.iterdir() if f.is_file()]
         else:
-            all_local_files = [Path(str(f).replace(" ", "")) for f in self.target_dir.rglob("*") if f.is_file()]
+            all_local_files = [f for f in self.target_dir.rglob("*") if f.is_file()]
 
         files_to_delete = set(all_local_files) - self.processed_local_paths
 
