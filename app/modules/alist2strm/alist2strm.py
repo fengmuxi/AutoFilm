@@ -112,39 +112,37 @@ class Alist2Strm:
 
             :param path: AlistPath 对象
             """
-
-            if path.is_dir:
-                return False
-
-            if path.suffix.lower() not in self.process_file_exts:
-                logger.debug(f"文件 {path.name} 不在处理列表中")
-                return False
-
             try:
+                if path.is_dir:
+                    return False
+
+                if path.suffix.lower() not in self.process_file_exts:
+                    logger.debug(f"文件 {path.name} 不在处理列表中")
+                    return False
+
                 local_path = self.__get_local_path(path)
+
+                self.processed_local_paths.add(local_path)
+
+                if not self.overwrite and local_path.exists():
+                    if path.suffix in self.download_exts:
+                        local_path_stat = local_path.stat()
+                        if local_path_stat.st_mtime < path.modified_timestamp:
+                            logger.debug(
+                                f"文件 {local_path.name} 已过期，需要重新处理 {path.file_path}"
+                            )
+                            return True
+                        if local_path_stat.st_size < path.size:
+                            logger.debug(
+                                f"文件 {local_path.name} 大小不一致，可能是本地文件损坏，需要重新处理 {path.file_path}"
+                            )
+                            return True
+                    logger.debug(f"文件 {local_path.name} 已存在，跳过处理 {path.file_path}")
+                    return False
+                return True
             except OSError as e:  # 可能是文件名过长
                 logger.warning(f"获取 {path.file_path} 本地路径失败：{e}")
                 return False
-
-            self.processed_local_paths.add(local_path)
-
-            if not self.overwrite and local_path.exists():
-                if path.suffix in self.download_exts:
-                    local_path_stat = local_path.stat()
-                    if local_path_stat.st_mtime < path.modified_timestamp:
-                        logger.debug(
-                            f"文件 {local_path.name} 已过期，需要重新处理 {path.file_path}"
-                        )
-                        return True
-                    if local_path_stat.st_size < path.size:
-                        logger.debug(
-                            f"文件 {local_path.name} 大小不一致，可能是本地文件损坏，需要重新处理 {path.file_path}"
-                        )
-                        return True
-                logger.debug(f"文件 {local_path.name} 已存在，跳过处理 {path.file_path}")
-                return False
-
-            return True
 
         if self.mode not in ["AlistURL", "RawURL", "AlistPath"]:
             logger.warning(
