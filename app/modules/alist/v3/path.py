@@ -59,6 +59,17 @@ class AlistPath(BaseModel):
         return URLUtils.encode(url)
 
     @property
+    def server_download_url(self) -> str:
+        """
+        文件下载地址
+        """
+        if self.sign:
+            url = self.server_url + "/d" + self.abs_path + "?sign=" + self.sign
+        else:
+            url = self.server_url + "/d" + self.abs_path
+        return URLUtils.encode(url)
+
+    @property
     def proxy_download_url(self) -> str:
         """
         Alist代理下载地址

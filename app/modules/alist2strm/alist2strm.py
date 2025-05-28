@@ -197,7 +197,7 @@ class Alist2Strm:
             logger.info(f"{local_path.name} 创建成功")
         else:
             async with self.__max_downloaders:
-                await RequestUtils.download(path.download_url, local_path)
+                await RequestUtils.download(path.server_download_url, local_path)
                 logger.info(f"{local_path.name} 下载成功")
 
     def __get_local_path(self, path: AlistPath) -> Path:
